@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import * as crypto from "node:crypto";
 import { prisma } from "../db/prisma";
 
 export const GENESIS_HASH = "0000000000000000000000000000000000000000000000000000000000000000";

@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import * as crypto from "node:crypto";
 
 /**
  * Constant-time string equality comparison using SHA-256 digest buffers.
