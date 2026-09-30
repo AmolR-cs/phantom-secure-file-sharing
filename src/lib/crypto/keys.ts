@@ -102,9 +102,14 @@ export function buildShareUrl(
   baseUrl: string,
   fileId: string,
   keyParam: string,
-  isWrapped = false
+  isWrapped = false,
+  ivParam?: string
 ): string {
-  const fragmentKey = isWrapped ? "wrapped" : "key";
   const url = baseUrl.replace(/\/+$/, "");
+  if (isWrapped && ivParam) {
+    return `${url}/f/${fileId}#wrapped=${keyParam}&iv=${ivParam}`;
+  }
+  const fragmentKey = isWrapped ? "wrapped" : "key";
   return `${url}/f/${fileId}#${fragmentKey}=${keyParam}`;
 }
+

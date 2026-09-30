@@ -44,6 +44,7 @@ export default function DownloadPortal({ params }: { params: Promise<{ id: strin
   // Keys in client RAM
   const [masterKeyBytes, setMasterKeyBytes] = useState<Uint8Array | null>(null);
   const [wrappedKeyStr, setWrappedKeyStr] = useState<string | null>(null);
+  const [passwordIvStr, setPasswordIvStr] = useState<string | null>(null);
 
   // Password prompt state
   const [passwordInput, setPasswordInput] = useState<string>("");
@@ -76,6 +77,9 @@ export default function DownloadPortal({ params }: { params: Promise<{ id: strin
 
         if (parsed.wrapped) {
           setWrappedKeyStr(parsed.wrapped);
+          if (parsed.iv) {
+            setPasswordIvStr(parsed.iv);
+          }
         } else if (parsed.key) {
           try {
             const rawKey = fromBase64Url(parsed.key);
@@ -131,10 +135,11 @@ export default function DownloadPortal({ params }: { params: Promise<{ id: strin
     try {
       setPasswordError(null);
       // Unwrap Master Key in Browser RAM
+      const ivToUse = passwordIvStr || fileMeta.metadataIv;
       const unwrappedKey = await unwrapMasterKey(
         wrappedKeyStr,
         fileMeta.passwordSalt,
-        fileMeta.metadataIv,
+        ivToUse,
         passwordInput
       );
 

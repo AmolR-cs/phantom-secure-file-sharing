@@ -210,6 +210,24 @@ describe("PHANTOM Cryptographic Core", () => {
         "WrongPassword123!"
       )
     ).rejects.toThrow();
+
+    // Verify buildShareUrl with wrapped key and iv fragment round-trip
+    const url = buildShareUrl("https://phantom.share", "test_file_id", wrapResult.wrappedKey, true, wrapResult.iv);
+    expect(url).toContain("#wrapped=");
+    expect(url).toContain("&iv=");
+
+    const hash = url.slice(url.indexOf("#"));
+    const parsed = parseFragment(hash);
+    expect(parsed.wrapped).toBe(wrapResult.wrappedKey);
+    expect(parsed.iv).toBe(wrapResult.iv);
+
+    const recoveredFromFragment = await unwrapMasterKey(
+      parsed.wrapped,
+      wrapResult.salt,
+      parsed.iv,
+      password
+    );
+    expect(recoveredFromFragment).toEqual(masterKey);
   });
 
   it("signs and validates capability tokens with replay prevention", async () => {

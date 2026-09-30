@@ -186,8 +186,8 @@ export default function UploadPage() {
 
       // 7. Construct Final URL with Master Key in Fragment
       const origin = window.location.origin;
-      const finalUrl = enablePassword && wrappedKeyB64
-        ? `${origin}/f/${fileIdRandom}#wrapped=${wrappedKeyB64}`
+      const finalUrl = enablePassword && wrappedKeyB64 && passwordIvB64
+        ? buildShareUrl(origin, fileIdRandom, wrappedKeyB64, true, passwordIvB64)
         : buildShareUrl(origin, fileIdRandom, masterKeyB64);
 
       setShareUrl(finalUrl);
