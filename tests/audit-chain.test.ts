@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import { prisma } from "../src/lib/db/prisma";
 import {
   appendAuditLog,
@@ -9,6 +9,11 @@ import {
 describe("Tamper-Evident Hash-Chained Audit Trail", () => {
   beforeEach(async () => {
     // Clean audit table before each test
+    await prisma.auditLog.deleteMany();
+  });
+
+  afterAll(async () => {
+    // Clean audit table after tests so test-injected corruptions do not persist in dev.db
     await prisma.auditLog.deleteMany();
   });
 
