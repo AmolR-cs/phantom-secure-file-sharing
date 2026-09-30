@@ -1,0 +1,76 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model FileRecord {
+  id                String       @id
+  salt              String
+  encryptedMetadata String
+  metadataIv        String
+  noncePrefix       String
+  totalChunks       Int
+  totalSizeBytes    Int
+  burnAfterRead     Boolean      @default(false)
+  maxDownloads      Int          @default(1)
+  downloadCount     Int          @default(0)
+  expiresAt         DateTime?
+  passwordVerifier  String?
+  passwordSalt      String?
+  status            String       @default("ACTIVE") // ACTIVE, BURNED, EXPIRED, REVOKED
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  shreddedAt        DateTime?
+
+  chunks            ChunkRecord[]
+
+  @@index([status, expiresAt])
+}
+
+model ChunkRecord {
+  id          String     @id @default(cuid())
+  fileId      String
+  chunkIndex  Int
+  chunkSize   Int
+  storagePath String
+  file        FileRecord @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@unique([fileId, chunkIndex])
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  sequence      Int      @unique
+  prevHash      String
+  currentHash   String
+  timestamp     DateTime @default(now())
+  eventType     String
+  linkId        String?
+  ipHash        String
+  userAgentHash String
+  status        String
+  details       String?
+
+  @@index([sequence])
+  @@index([timestamp])
+}
+
+model UsedNonce {
+  nonce     String   @id
+  linkId    String
+  usedAt    DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+model RateLimitEntry {
+  key         String    @id
+  count       Int       @default(1)
+  lastRequest DateTime  @default(now())
+  lockedUntil DateTime?
+}

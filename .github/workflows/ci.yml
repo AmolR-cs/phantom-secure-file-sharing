@@ -1,0 +1,40 @@
+name: PHANTOM Cybersecurity CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  security-and-tests:
+    name: Adversary Testing & Build Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Setup Database Schema
+        run: npm run db:push
+
+      - name: Run Cryptographic & Concurrency Tests (Vitest)
+        run: npm test
+
+      - name: Execute Headless Attack Lab (Red-Team Simulation Suite)
+        run: npm run attack
+
+      - name: Run 90-Second Demo Story
+        run: npm run demo
+
+      - name: Build Next.js Production Bundle
+        run: npm run build
